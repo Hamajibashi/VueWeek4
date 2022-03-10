@@ -4,7 +4,7 @@ import pagination from './pagination.js';
 let productModal = '';
 let delModal = '';
 
-const app = {
+const app = createApp({
     components:{
         pagination
     },
@@ -41,27 +41,6 @@ const app = {
                 .then(res => {
                     this.products = res.data.products;
                     this.pagination = res.data.pagination;
-                })
-                .catch(err => {
-                    alert(err.data.message);
-                })
-        },
-        updateProduct() {
-            let url = `${this.apiUrl}/api/${this.apiPath}/admin/product`;
-            let httpMethod = 'post';
-
-            //根據 isNew 來判斷要串接 post 還是 put 
-            if (!this.isNew) {
-                //編輯狀態
-                url = `${this.apiUrl}/api/${this.apiPath}/admin/product/${this.tempProduct.id}`;
-                httpMethod = 'put';
-            }
-            // post 和 put 要帶的參數相同，整體架構也相同，所以可以寫在一起
-            axios[httpMethod](url, { data: this.tempProduct })
-                .then(res => {
-                    alert(res.data.message);
-                    productModal.hide();
-                    this.getProduct();
                 })
                 .catch(err => {
                     alert(err.data.message);
@@ -112,6 +91,42 @@ const app = {
         //刪除用的 Modal，禁止使用者用鍵盤關閉 Modal
         delModal = new bootstrap.Modal(document.getElementById('delProductModal'), { keyboard: false });
     }
-}
+});
 
-createApp(app).mount('#app');
+app.component('productModal',{
+    data(){
+        return{
+            apiUrl:'https://vue3-course-api.hexschool.io/v2',
+            apiPath:'mylmii'
+        }
+    },
+    //抓取 app 中的 tempProduct 的資料
+    props:['tempProduct'],
+    template:'#templateForProductModal',
+    methods:{
+        updateProduct() {
+            let url = `${this.apiUrl}/api/${this.apiPath}/admin/product`;
+            let httpMethod = 'post';
+
+            //根據 isNew 來判斷要串接 post 還是 put 
+            if (!this.isNew) {
+                //編輯狀態
+                url = `${this.apiUrl}/api/${this.apiPath}/admin/product/${this.tempProduct.id}`;
+                httpMethod = 'put';
+            }
+            // post 和 put 要帶的參數相同，整體架構也相同，所以可以寫在一起
+            axios[httpMethod](url, { data: this.tempProduct })
+                .then(res => {
+                    alert(res.data.message);
+                    productModal.hide();
+                    // getProduct 是外層方法，這裡使用 emit
+                    this.$emit('get-product');
+                })
+                .catch(err => {
+                    alert(err.data.message);
+                })
+        },
+    }
+})
+
+app.mount('#app');
