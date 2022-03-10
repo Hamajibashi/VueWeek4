@@ -62,6 +62,9 @@
             </tr>
           </tbody>
         </table>
+        <!-- props:內層為 pages，外層為 pagination，前內後外 -->
+        <!-- emit:內層為 get-product，外層為 getProduct，前內後外 -->
+        <pagination :pages="pagination" @get-product="getProduct"></pagination>
       </div>
       <!-- Modal -->
       <div id="productModal" ref="productModal" class="modal fade" tabindex="-1" aria-labelledby="productModalLabel"
