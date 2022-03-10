@@ -5,6 +5,7 @@ let productModal = '';
 let delModal = '';
 
 const app = createApp({
+    //區域註冊：分頁元件
     components:{
         pagination
     },
@@ -46,18 +47,6 @@ const app = createApp({
                     alert(err.data.message);
                 })
         },
-        delProduct() {
-            const url = `${this.apiUrl}/api/${this.apiPath}/admin/product/${this.tempProduct.id}`;
-            axios.delete(url)
-                .then(res => {
-                    alert(res.data.message);
-                    delModal.hide();
-                    this.getProduct();
-                })
-                .catch(err => {
-                    alert(err.data.message);
-                })
-        },
         openModal(isNew, item) {
             if (isNew === 'new') {
                 this.tempProduct = { //清空物件
@@ -83,16 +72,10 @@ const app = createApp({
         const token = document.cookie.replace(/(?:(?:^|.*;\s*)mylToken\s*\=\s*([^;]*).*$)|^.*$/, "$1");
         axios.defaults.headers.common['Authorization'] = token;
         this.checkLogin();
-
-        //使用 new 建立 Modal，拿到實體 DOM 並賦予到變數上
-        //新增與編輯用 Modal，禁止使用者用 Esc 關閉 Modal
-        productModal = new bootstrap.Modal(document.getElementById('productModal'), { keyboard: false });
-
-        //刪除用的 Modal，禁止使用者用鍵盤關閉 Modal
-        delModal = new bootstrap.Modal(document.getElementById('delProductModal'), { keyboard: false });
     }
 });
 
+// 全域註冊：新增與編輯用 Modal
 app.component('productModal',{
     data(){
         return{
@@ -101,7 +84,7 @@ app.component('productModal',{
         }
     },
     //抓取 app 中的 tempProduct 的資料
-    props:['tempProduct'],
+    props:['tempProduct', 'isNew'],
     template:'#templateForProductModal',
     methods:{
         updateProduct() {
@@ -126,6 +109,38 @@ app.component('productModal',{
                     alert(err.data.message);
                 })
         },
+    },
+    mounted(){
+        productModal = new bootstrap.Modal(document.getElementById('productModal'), { keyboard: false });
+    }
+})
+
+// 全域註冊：刪除用 Modal
+app.component('delModal',{
+    data(){
+        return{
+            apiUrl:'https://vue3-course-api.hexschool.io/v2',
+            apiPath:'mylmii'
+        }
+    },
+    props:['tempProduct'],
+    template:'#templateForDelModal',
+    methods:{
+        delProduct() {
+            const url = `${this.apiUrl}/api/${this.apiPath}/admin/product/${this.tempProduct.id}`;
+            axios.delete(url)
+                .then(res => {
+                    alert(res.data.message);
+                    delModal.hide();
+                    this.$emit('get-product');
+                })
+                .catch(err => {
+                    alert(err.data.message);
+                })
+        },
+    },
+    mounted(){
+        delModal = new bootstrap.Modal(document.getElementById('delProductModal'), { keyboard: false });
     }
 })
 
